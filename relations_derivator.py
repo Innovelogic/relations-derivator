@@ -1,15 +1,29 @@
-import nltk as nltk
+import sklearn
+from boolean_expression_creator import BooleanExpressionCreator as bEC
 
-class BooleanExpressionCreator:
-    'Generating Boolean expression from truth table'
+truthtble = a = (("IA", "IB", "IC", "OD", "OZ"),
+                 (0, 0, 0, 0, 1),
+                 (0, 0, 0, 0, 1),
+                 (0, 0, 0, 0, 0),
+                 (0, 0, 0, 0, 1),
+                 (0, 0, 0, 0, 0),
+                 (0, 0, 0, 0, 0),
+                 (0, 0, 0, 0, 1),
+                 (0, 0, 0, 0, 1),
+                 (0, 0, 0, 0, 0),
+                 (0, 0, 0, 0, 1),
+                 (0, 0, 0, 0, 0),
+                 (0, 0, 0, 0, 1))
+print(a[2])
+print(len(a))
 
-    def input_number_identifier(self):
-        print(1)
-
-    def metrixCreator(self):
-        print(2)
+print(bEC.boolean_expression_generator(a))
 
 
 
-class RelationsExtractor:
-    'Deriving Relationships between Inputs and Outputs'
+
+
+
+
+
+
