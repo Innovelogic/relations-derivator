@@ -1,7 +1,7 @@
 import sklearn
 from boolean_expression_creator import BooleanExpressionCreator as bEC
 
-truthtble = a = (("IA", "IB", "IC", "ID", "OY", "OZ"),
+truthtble = a = (("IA", "IB", "IC", "ID", "OZ", "OY"),
                  # (0, 0, 0, 0, 1, 1),
                  # (0, 0, 0, 1, 1, 0),
                  # (0, 0, 1, 0, 0, 0),
