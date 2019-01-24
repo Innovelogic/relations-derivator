@@ -35,18 +35,20 @@ class BooleanExpressionCreator:
                 current_tuple = value_matrix[x]
                 if 1 == current_tuple[inputs_count + i]:  # only genera boolean expression for outputs when "1"
                     temp_boolean_expresion = BooleanExpressionCreator.bool_expression_of_each_tuple_each_output(
-                        inputs_count, outputs_count, inputs_count + i, current_tuple, tuple_head)
+                        inputs_count, current_tuple, tuple_head)
                     if 0 == len(boolean_expression):        # concatenate each boolean expression
                         boolean_expression = boolean_expression + temp_boolean_expresion
                     else:
                         boolean_expression = boolean_expression + " + " + temp_boolean_expresion
                 # if 0 < len(temp_boolean_expresion):
-            boolean_expression_set = boolean_expression_set + tuple_head[inputs_count+i][1:] + ' = ' + boolean_expression + "  "
+            if 0 < len(boolean_expression):
+                boolean_expression_set = boolean_expression_set + tuple_head[inputs_count+i][1:] + ' = '\
+                                     + boolean_expression + "  "
             # concatenate boolean expression of every outputs'
         return boolean_expression_set
 
     @staticmethod
-    def bool_expression_of_each_tuple_each_output(input_count, output_count, output_place, tuple_current, tuple_head):
+    def bool_expression_of_each_tuple_each_output(input_count, tuple_current, tuple_head):
         """ToDo"""
         boolean_expression = ""
         # if 1 == tuple_current[input_count + output_place - 1]:
