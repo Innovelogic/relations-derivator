@@ -17,9 +17,12 @@ class TruthTableCreator:
             for j in range(len(boolean_value)):
                 #  insert each binary point for relevant places on truth table
                 truth_table[i][input_count-1-j] = int(boolean_value[len(boolean_value)-1-j])
+        truth_table = [['IA', 'IB', 'IC', 'ID', 'OZ']] + truth_table
+        #  truth_table = tuple(truth_table)
         return truth_table
 
-    def tuple_finder(self):
+    @staticmethod
+    def tuple_finder():
         """ToDo"""
 
     def zero_value_filler(self):
