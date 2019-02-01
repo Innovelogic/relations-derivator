@@ -21,22 +21,32 @@ truthtble = a = (("IA", "IB", "IC", "ID", "OZ", "OY"),
 
 #  print(bEC.boolean_expression_generator(a))
 
-inputs = 5
+inputs = 2
 outputs = 2
 
-sentence = "IA=1, IC=0, IZ=0, IB=1 and ID=0 then OY=1 and OZ=0."  # "IA=0, IB=0, IC=0 and ID=0 then OZ=1."
-
-rES.relations_extractor(inputs, outputs, sentence)
+sentence = "IA=1, IC=0, IZ=0, IB=0 and ID=0 then OY=1 and OZ=0."  # "IA=0, IB=0, IC=0 and ID=0 then OZ=1."
 
 
-# print(bEC.boolean_expression_generator(truthtble))
 
-#  truthtble2 = tTCreator.truth_table_generator(inputs, outputs)
-#  print(tTCreator.initial_tuple_insert(inputs, truthtble2))
+
+truthtble2 = tTCreator.truth_table_generator(inputs, outputs)
+print(truthtble2)
+truthtble2 = tTCreator.initial_tuple_insert(inputs, truthtble2)
 # print(bin(4))
 # print()
 #
-# print(truth_table)
+print(truthtble2)
+
+inputs_array, outputs_array = rES.relations_extractor(inputs, outputs, sentence)
+
+truthtble2 = tTCreator.header_tuple_adder(inputs, outputs, inputs_array, outputs_array, truthtble2)
+print(truthtble2)
+
+final_truth_table = rES.output_writer(inputs, outputs, inputs_array, outputs_array, truthtble2)
+
+print(final_truth_table)
+
+# print(bEC.boolean_expression_generator(truthtble))
 
 # from nltk.corpus import udhr
 # languages = ['Chickasaw', 'English', 'German_Deutsch',
