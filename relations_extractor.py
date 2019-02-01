@@ -26,22 +26,23 @@ class RelationsExtractorSecond:
     #                     'I': 18, 'H': 19, 'G': 20, 'F': 21, 'E': 22, 'D': 23, 'C': 24, 'B': 25, 'A': 26}
     #     return dict_outputs
 
+    @staticmethod
+    def sentence_inputs_outputs_cont(sentence):
+        inputs_count = len(re.findall("(I[A-Z]=\d)", sentence, re.IGNORECASE))
+        outputs_count = len(re.findall("(O[A-Z]=\d)", sentence, re.IGNORECASE))
+        return inputs_count, outputs_count
 
     @staticmethod
     def output_writer(inputs_count, outputs_count, inputs_list, outputs_list, truth_tabel):
-        input_binary_value = ''
+        input_binary_value = ""
         # state = True
-        print(inputs_list)
         for i in range(len(inputs_list)):
             input_binary_value = input_binary_value + inputs_list[i][3]
-        print(input_binary_value)
         for j in range(2**inputs_count):
-            current_tuple_input = ''
+            current_tuple_input = ""
             temp_tuple = truth_tabel[j+1]
-            print(temp_tuple)
             for k in range(inputs_count):
                 current_tuple_input = current_tuple_input + str(temp_tuple[k])
-            print(current_tuple_input)
             if input_binary_value == current_tuple_input:
                 for l in range(outputs_count):
                     truth_tabel[j+1][inputs_count+l] = int(outputs_list[l][3])
@@ -52,9 +53,9 @@ class RelationsExtractorSecond:
         return truth_tabel
 
     @staticmethod
-    def relations_extractor(input_count, output_count, sentense):
-        input_array = re.findall("(I[A-Z]=\d)", sentense, re.IGNORECASE)  # "(I[A-Z]=\d[,and ])" when IA = 1 (No need)
-        output_array = re.findall("(O[A-Z]=\d)", sentense, re.IGNORECASE)  # "(O[A-Z]=\d[,and ])" when OZ = 1 (No need)
+    def relations_extractor(input_count, output_count, sentence):
+        input_array = re.findall("(I[A-Z]=\d)", sentence, re.IGNORECASE)  # "(I[A-Z]=\d[,and ])" when IA = 1 (No need)
+        output_array = re.findall("(O[A-Z]=\d)", sentence, re.IGNORECASE)  # "(O[A-Z]=\d[,and ])" when OZ = 1 (No need)
         if input_count != len(input_array):
             print("inputs count not match as given count")
         if output_count != len(output_array):

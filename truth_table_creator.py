@@ -1,6 +1,3 @@
-import re
-
-
 class TruthTableCreator:
     """It has all method of Truth table creator and other functionality such as filling 0 outputs"""
 
@@ -11,7 +8,7 @@ class TruthTableCreator:
         return truth_table
 
     @staticmethod
-    def initial_tuple_insert(input_count, truth_table):
+    def initial_tuple_inputs_insert(input_count, truth_table):
         """This method will insert tuple initial inputs each by each as relevant"""
         for i in range(2**input_count):
             boolean_value = bin(i)
@@ -32,12 +29,10 @@ class TruthTableCreator:
         input and outputs arrays must be sorted arrays
         """
         header_tuple = [" " for i in range(inputs_count+outputs_count)]
-        print(header_tuple)
         for i in range(inputs_count):
-            header_tuple[i] = inputs_array[i][1]
+            header_tuple[i] = inputs_array[i][:2]
         for j in range(outputs_count):
-            header_tuple[inputs_count+j] = outputs_array[j][1]
-        print(header_tuple)
+            header_tuple[inputs_count+j] = outputs_array[j][:2]
         truth_table = [header_tuple] + truth_table
         return truth_table
 
