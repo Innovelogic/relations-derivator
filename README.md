@@ -2,6 +2,8 @@
 Derive the relationship of the simplified logical text
 (SOP)
 
+Python ~ 3.6
+
 ## Example Problem
 
 ### base problem
@@ -32,4 +34,4 @@ Note: No need ordered inputs or outputs, Inputs outputs can be separate by ',' o
 <br /> Ex :- IB=0 and IA=1, IC=0, ID=1 then OZ=1
 
 ### output
-Z = A'B'C'D' + A'B'C'D + A'B'CD + A'BCD' + A'BCD + AB'C'D + AB'CD
+Z = A'B'C'D' + A'B'CD' + A'BC'D' + A'BCD' + A'BCD + AB'C'D + AB'CD
