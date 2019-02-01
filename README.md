@@ -1,5 +1,7 @@
 # relations-derivator
-Derive the relationship of the simplified loigcal text
+Derive the relationship of the simplified logical text
+(SOP)
+
 
 ## base problem
 
@@ -8,7 +10,7 @@ Derive the relationship of the simplified loigcal text
 
 
 ## input (second phase)
-IA = 0, IB = 0, IC = 0 and ID = 0 then OZ = 1. <br />
+IA = 0 and IB = 0 and IC = 0 and ID = 0 then OZ = 1. <br />
 IA = 0, IB = 0, IC = 1 and ID = 0 then OZ = 1. <br />
 IA = 0, IB = 1, IC = 0 and ID = 0 then OZ = 1. <br />
 IA = 0, IB = 1, IC = 1 and ID = 0 then OZ = 1. <br />

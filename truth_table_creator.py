@@ -17,7 +17,8 @@ class TruthTableCreator:
             for j in range(len(boolean_value)):
                 #  insert each binary point for relevant places on truth table
                 truth_table[i][input_count-1-j] = int(boolean_value[len(boolean_value)-1-j])
-        truth_table = [['IA', 'IB', 'IC', 'ID', 'OZ']] + truth_table
+        truth_table = [['IA', 'IB', 'IC', 'ID', 'OZ']] + truth_table  # this is not dynamic
+        """ToDo"""
         #  truth_table = tuple(truth_table)
         return truth_table
 
