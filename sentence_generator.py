@@ -41,9 +41,9 @@ class SentenceGenerator:
 
     @staticmethod
     def rules_checker(nltk_pos):
-        grammar_list = ["RULE 03: {<CD>?<CC>*<DT><NNP><CC><NNP>}", "RULE 04:{<DT| NNP><NNP+><CC><NNP+>}",
+        grammar_list = ["RULE 03: {<CD><CC><DT><NNP><CC><NNP>}", "RULE 04:{<RB|CC|NNP>+<NNP>+<CC>+<NNP>}",
                         "RULE 05: {<IN><JJS><CD>}", "RULE 06: {<CD><CC><JJR>}",
-                        "RULE 07: {<DT><NNP><CC><NNP>}", "RULE 08: {<NNP><CC><NNP>}"]
+                        "RULE 07: {<DT><NNP><CC><NNP>}", "RULE 08: {<NNP>+<CC>+<NNP>}"]
 
         # sub_sentence_list = []
         for grammar in grammar_list:
@@ -68,10 +68,10 @@ class SentenceGenerator:
             "ToDo"
         elif 3 == rule_number:
             "ToDo"
-            succsess_state = sGR.rule_03(pos_tagged_sentence, result, sub_result, inputs_names, outputs_names, total_inputs_count, total_outputs_count)
+            succsess_state = sGR.rule_03(pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
         elif 4 == rule_number:
             "ToDo"
-            succsess_state = sGR.rule_04()
+            succsess_state = sGR.rule_04(pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
         elif 5 == rule_number:
             "ToDo"
             succsess_state = sGR.rule_05()
@@ -83,7 +83,7 @@ class SentenceGenerator:
             succsess_state = sGR.rule_07()
         elif 8 == rule_number:
             "ToDo"
-            succsess_state = sGR.rule_08()
+            succsess_state = sGR.rule_08(pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
         elif 9 == rule_number:
             "ToDo"
         elif 10 == rule_number:

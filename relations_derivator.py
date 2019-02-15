@@ -44,7 +44,7 @@ for i in sentences_ff:
         result, sub_result, rule = sG.rules_checker(pos_tagged_sentence)
         if result.height() > 2:
             # print(result, sub_result, rule)
-            # print(rule)
+            print("RULE number is = ", rule)
             rule_number = int(rule[5:7])  # getting integer value of the rule string ex:- RULE 05: => 05
             new_sentences = sG.sentence_generator(i, pos_tagged_sentence, result, sub_result, total_inputs_count,
                                                   total_outputs_count, inputs_names, outputs_names, rule_number)
