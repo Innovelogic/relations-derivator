@@ -1,6 +1,7 @@
 import nltk
 import re
 from relations_extractor import RelationsExtractorSecond as rES
+from sentence_generator_rules import SentenceGeneratorRules as sGR
 
 
 class SentenceGenerator:
@@ -40,18 +41,57 @@ class SentenceGenerator:
 
     @staticmethod
     def rules_checker(nltk_pos):
-        grammar_list = ["RULE 03: {<CD>?<CC>*<DT>}", "RULE 04:{<DT| NNP><NNP+><CC><NNP+>}",
+        grammar_list = ["RULE 03: {<CD>?<CC>*<DT><NNP><CC><NNP>}", "RULE 04:{<DT| NNP><NNP+><CC><NNP+>}",
                         "RULE 05: {<IN><JJS><CD>}", "RULE 06: {<CD><CC><JJR>}",
                         "RULE 07: {<DT><NNP><CC><NNP>}", "RULE 08: {<NNP><CC><NNP>}"]
 
+        # sub_sentence_list = []
         for grammar in grammar_list:
             if not grammar[5:7].isdecimal():
                 print(grammar + " is wrong format")
             cp = nltk.RegexpParser(grammar)
             result = cp.parse(nltk_pos)
             if 2 < result.height():
-                return result, result.productions()[1], grammar
-
+                sub_result = []
+                for s in result.subtrees(lambda result: result.height() == 2):
+                    sub_result = s[1:]
+                return result, sub_result, grammar
         return nltk_pos, nltk_pos.productions()[0], grammar_list
+
+    @staticmethod
+    def sentence_generator(i, pos_tagged_sentence, result, sub_result, total_inputs_count, total_outputs_count, inputs_names, outputs_names, rule_number):
+        "todo"
+        succsess_state = False
+        if 1 == rule_number:
+            "ToDo"
+        elif 2 == rule_number:
+            "ToDo"
+        elif 3 == rule_number:
+            "ToDo"
+            succsess_state = sGR.rule_03(pos_tagged_sentence, result, sub_result, inputs_names, outputs_names, total_inputs_count, total_outputs_count)
+        elif 4 == rule_number:
+            "ToDo"
+            succsess_state = sGR.rule_04()
+        elif 5 == rule_number:
+            "ToDo"
+            succsess_state = sGR.rule_05()
+        elif 6 == rule_number:
+            "ToDo"
+            succsess_state = sGR.rule_06()
+        elif 7 == rule_number:
+            "ToDo"
+            succsess_state = sGR.rule_07()
+        elif 8 == rule_number:
+            "ToDo"
+            succsess_state = sGR.rule_08()
+        elif 9 == rule_number:
+            "ToDo"
+        elif 10 == rule_number:
+            "ToDo"
+        elif 11 == rule_number:
+            "ToDo"
+        elif 12 == rule_number:
+            "ToDo"
+            succsess_state = sGR.rule_01()
 
 

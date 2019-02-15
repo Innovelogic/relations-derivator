@@ -9,8 +9,8 @@ from sentence_generator import SentenceGenerator as sG
 
 
 # First Phase #
-inputs_count = 3
-outputs_count = 1
+total_inputs_count = 3
+total_outputs_count = 1
 
 ff = open('dummy_input_first.txt')
 ff = ff.read()
@@ -24,18 +24,18 @@ inputs_names, outputs_names = sG.inputs_outputs_name_extractor(sentences_ff)  # 
 # print(outputs_names)
 
 #  Checks the inputs outputs conts from sentences regex search for every inputs and outputs
-if inputs_count > len(inputs_names):
+if total_inputs_count > len(inputs_names):
     print("Inputs names are not completed")
-elif inputs_count < len(inputs_names):
+elif total_inputs_count < len(inputs_names):
     print("Inputs count is wrong")
 
-if outputs_count > len(outputs_names):
+if total_outputs_count > len(outputs_names):
     print("Outputs names are not completed")
-elif outputs_count < len(outputs_names):
+elif total_outputs_count < len(outputs_names):
     print("Outputs count is wrong")
 
 for i in sentences_ff:
-    value = sG.inputs_counter_checker(inputs_count, i)
+    value = sG.inputs_counter_checker(total_inputs_count, i)
     # print(value)
     if 0 < len(re.findall("^ONLY", i)):
         "ToDo - ONLY keyword"
@@ -44,9 +44,10 @@ for i in sentences_ff:
         result, sub_result, rule = sG.rules_checker(pos_tagged_sentence)
         if result.height() > 2:
             # print(result, sub_result, rule)
-            print(rule)
-            rule_number = int(rule[5:7])
-
+            # print(rule)
+            rule_number = int(rule[5:7])  # getting integer value of the rule string ex:- RULE 05: => 05
+            new_sentences = sG.sentence_generator(i, pos_tagged_sentence, result, sub_result, total_inputs_count,
+                                                  total_outputs_count, inputs_names, outputs_names, rule_number)
     if value:
         "Write on the output without any change"
         "ToDo"

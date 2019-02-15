@@ -1,18 +1,2 @@
-ONLY one or both IA=1 and IB=1 then OZ=1.
-ONLY Either IA=1 or IB=1 then OZ=1.
-ONLY Either IA=1 or IB=1 then OZ=1.
-ONLY If either IA=1 or IA=1 is pressed, then the Doorbell rings.
-ONLY Neither IA=1 nor IB=1 then OZ=1.
-ONLY At least one IA=1, IB=1 and IC=1 then OZ=1.
-ONLY At least two IA=1, IB=1 and IC=1 then OZ=1.
-ONLY At least three IA=1, IB=1 and IC=1 then OZ=1.
-ONLY At most two IA=1, IB=1 and IC=1 then OZ=1.
-ONLY At most three IA=1, IB=1 and IC=1 then OZ=1.
-ONLY one or more IA=1, IB=1 and IC=1 then OZ=1.
-ONLY two or more IA=1, IB=1 and IC=1 then OZ=1.
-ONLY three or more IA=1, IB=1 and IC=1 then OZ=1.
-ONLY one or less IA=1, IB=1 and IC=1 then OZ=1.
-ONLY two or less IA=1, IB=1 and IC=1 then OZ=1.
-ONLY three or less IA=1, IB=1 and IC=1 then OZ=1.
-ONLY both IA=1 and IB=1 then OZ=1.
-ONLY IA=1 or IB=1 then OZ=1.
+ONLY sdfs sdfsdf IA=1 , IB=1 and IC=1 the OZ=1.
+ONLY one or both IB=1 and IA=1 then OX=1 and OZ=0.
