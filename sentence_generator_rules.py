@@ -224,7 +224,6 @@ class SentenceGeneratorRules:
                 else:
                     outputs_array_of_sentence = re.findall("(O[A-Z]=\d)", sentence, re.IGNORECASE)
                     if "least" == str(sentence_keyword[0]).lower():
-                        print("least")
                         truth_table_empty = tTC.truth_table_generator(total_inputs_count, 0)
                         truth_table_with_initial_inputs = tTC.initial_tuple_inputs_insert(total_inputs_count,
                                                                                           truth_table_empty)
@@ -265,7 +264,6 @@ class SentenceGeneratorRules:
                                 print(new_sentence)
                         return True
                     elif "most" == str(sentence_keyword[0]).lower():
-                        print("most")
                         truth_table_empty = tTC.truth_table_generator(total_inputs_count, 0)
                         truth_table_with_initial_inputs = tTC.initial_tuple_inputs_insert(total_inputs_count,
                                                                                           truth_table_empty)
@@ -308,8 +306,124 @@ class SentenceGeneratorRules:
         return False
 
     @staticmethod
-    def rule_06():
-        """ToDo"""
+    def rule_06(sentence, pos_tagged_sentence, sub_result, inputs_names, total_inputs_count):
+        """
+        (one | two | three .......) or (more | less)
+        :param sentence:
+        :param pos_tagged_sentence:
+        :param sub_result:
+        :param inputs_names:
+        :param total_inputs_count:
+        :return:
+        """
+        sentence_keyword = [word for word, pos in list(sub_result) if (pos == 'JJR')]
+        if 1 != len(sentence_keyword):
+            print("There is more than one words which are having 'JJR' tag. "
+                  "Hint: Both 'more' and less‘ tags in same sentence or another JJR word like 'bigger’")
+        else:
+            count_keyword = [word for word, pos in list(sub_result) if (pos == 'CD')]
+            if 1 != len(count_keyword):  # check whether there is only one cd or multiple
+                print("There is more than one words having 'CD' tag. "
+                      "Hint: there can be more than one word like, 'one', 'two', 'three' ........")
+            else:
+                str(count_keyword[0]).lower()
+                dictionary_cd = {'one': 1,
+                                 'two': 2,
+                                 'three': 3,
+                                 'four': 4,
+                                 'five': 5,
+                                 'six': 6,
+                                 'seven': 7,
+                                 'eight': 8,
+                                 'nine': 9,
+                                 'ten': 10}
+                numerical_value_of_cd = dictionary_cd[str(count_keyword[0]).lower()]
+                if numerical_value_of_cd >= total_inputs_count:
+                    print("Wrong on " + count_keyword[0] + " or " + sentence_keyword[
+                        0] + ". Hint: It should be less value for " + count_keyword[0])
+                else:
+                    outputs_array_of_sentence = re.findall("(O[A-Z]=\d)", sentence, re.IGNORECASE)
+                    if "more" == str(sentence_keyword[0]).lower():
+                        truth_table_empty = tTC.truth_table_generator(total_inputs_count, 0)
+                        truth_table_with_initial_inputs = tTC.initial_tuple_inputs_insert(total_inputs_count,
+                                                                                          truth_table_empty)
+                        for i in range(len(truth_table_with_initial_inputs)):
+                            true_count_of_tuple = 0
+                            #  count of each input when true for each tuple
+                            #  Ex:- 1 1 0 0 (inputs order is A B C D) and
+                            #  then condition One or both IA=1 and IB=1 ......
+                            #  we can check relevant value occurrence for relevant two values A and B
+                            for j in range(len(truth_table_with_initial_inputs[i])):
+                                if int(truth_table_with_initial_inputs[i][j]) == 1:
+                                    true_count_of_tuple = true_count_of_tuple + 1
+                                    # sentence should be generate.
+                            if true_count_of_tuple >= numerical_value_of_cd:
+                                new_sentence = ''
+                                for k in range(len(inputs_names)):
+                                    if 1 == len(inputs_names):
+                                        new_sentence = new_sentence + "I" + inputs_names[k] + "=" + str(
+                                            truth_table_with_initial_inputs[i][k]) + " then "
+                                    elif 0 == k:
+                                        new_sentence = new_sentence + "I" + inputs_names[k] + "=" + str(
+                                            truth_table_with_initial_inputs[i][k]) + " , "
+                                    elif k == len(inputs_names) - 1:
+                                        new_sentence = new_sentence + "and I" + inputs_names[k] + "=" + str(
+                                            truth_table_with_initial_inputs[i][k]) + " then "
+                                    else:
+                                        new_sentence = new_sentence + "I" + inputs_names[k] + "=" + str(
+                                            truth_table_with_initial_inputs[i][k]) + " , "
+                                for l in range(len(outputs_array_of_sentence)):
+                                    if 1 == len(outputs_array_of_sentence):
+                                        new_sentence = new_sentence + outputs_array_of_sentence[l] + "."
+                                    elif 0 == l:
+                                        new_sentence = new_sentence + outputs_array_of_sentence[l] + " , "
+                                    elif k == len(inputs_names) - 1:
+                                        new_sentence = new_sentence + "and " + outputs_array_of_sentence[k] + "."
+                                    else:
+                                        new_sentence = new_sentence + " , " + outputs_array_of_sentence[k] + " , "
+                                print(new_sentence)
+                        return True
+                    elif "less" == str(sentence_keyword[0]).lower():
+                        truth_table_empty = tTC.truth_table_generator(total_inputs_count, 0)
+                        truth_table_with_initial_inputs = tTC.initial_tuple_inputs_insert(total_inputs_count,
+                                                                                          truth_table_empty)
+                        for i in range(len(truth_table_with_initial_inputs)):
+                            true_count_of_tuple = 0
+                            #  count of each input when true for each tuple
+                            #  Ex:- 1 1 0 0 (inputs order is A B C D) and
+                            #  then condition One or both IA=1 and IB=1 ......
+                            #  we can check relevant value occurrence for relevant two values A and B
+                            for j in range(len(truth_table_with_initial_inputs[i])):
+                                if int(truth_table_with_initial_inputs[i][j]) == 1:
+                                    true_count_of_tuple = true_count_of_tuple + 1
+                                    # sentence should be generate.
+                            if true_count_of_tuple <= numerical_value_of_cd:
+                                new_sentence = ''
+                                for k in range(len(inputs_names)):
+                                    if 1 == len(inputs_names):
+                                        new_sentence = new_sentence + "I" + inputs_names[k] + "=" + \
+                                                       str(truth_table_with_initial_inputs[i][k]) + " then "
+                                    elif 0 == k:
+                                        new_sentence = new_sentence + "I" + inputs_names[k] + "=" + \
+                                                       str(truth_table_with_initial_inputs[i][k]) + " , "
+                                    elif k == len(inputs_names) - 1:
+                                        new_sentence = new_sentence + "and I" + inputs_names[k] + "=" + \
+                                                       str(truth_table_with_initial_inputs[i][k]) + " then "
+                                    else:
+                                        new_sentence = new_sentence + "I" + inputs_names[k] + "=" + \
+                                                       str(truth_table_with_initial_inputs[i][k]) + " , "
+                                for l in range(len(outputs_array_of_sentence)):
+                                    if 1 == len(outputs_array_of_sentence):
+                                        new_sentence = new_sentence + outputs_array_of_sentence[l] + "."
+                                    elif 0 == l:
+                                        new_sentence = new_sentence + outputs_array_of_sentence[l] + " , "
+                                    elif k == len(inputs_names) - 1:
+                                        new_sentence = new_sentence + "and " + outputs_array_of_sentence[k] + "."
+                                    else:
+                                        new_sentence = new_sentence + " , " + outputs_array_of_sentence[k] + " , "
+                                print(new_sentence)
+                        return True
+        return False
 
     @staticmethod
     def rule_07():

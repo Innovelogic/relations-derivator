@@ -42,48 +42,48 @@ class SentenceGenerator:
     @staticmethod
     def rules_checker(nltk_pos):
         grammar_list = ["RULE 03: {<CD><CC><DT><NNP><CC><NNP>}", "RULE 04:{<RB|CC|NNP>+<NNP>+<CC>+<NNP>}",
-                        "RULE 05: {<IN>+<JJS>+<CD>}", "RULE 06: {<CD><CC><JJR>}",
+                        "RULE 05: {<IN>+<JJS>+<CD>}", "RULE 06: {<CD>+<CC>+<JJR>}",
                         "RULE 07: {<DT><NNP><CC><NNP>}", "RULE 08: {<NNP>+<CC>+<NNP>}"]
 
         # sub_sentence_list = []
         for grammar in grammar_list:
             if not grammar[5:7].isdecimal():
-                print(grammar + " is wrong format")
+                print(grammar + " is wrong format for rule")
             cp = nltk.RegexpParser(grammar)
             result = cp.parse(nltk_pos)
             if 2 < result.height():
                 sub_result = []
                 for s in result.subtrees(lambda result: result.height() == 2):
-                    sub_result = s[1:]
+                    sub_result = s[0:]  # convert tree into list
                 return result, sub_result, grammar
         return nltk_pos, nltk_pos.productions()[0], grammar_list
 
     @staticmethod
     def sentence_generator(sentence, pos_tagged_sentence, result, sub_result, total_inputs_count, total_outputs_count, inputs_names, outputs_names, rule_number):
         "todo"
-        succsess_state = False
+        success_state = False
         if 1 == rule_number:
             "ToDo"
         elif 2 == rule_number:
             "ToDo"
         elif 3 == rule_number:
             "ToDo"
-            succsess_state = sGR.rule_03(pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
+            success_state = sGR.rule_03(pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
         elif 4 == rule_number:
             "ToDo"
-            succsess_state = sGR.rule_04(pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
+            success_state = sGR.rule_04(pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
         elif 5 == rule_number:
             "ToDo"
-            succsess_state = sGR.rule_05(sentence, pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
+            success_state = sGR.rule_05(sentence, pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
         elif 6 == rule_number:
             "ToDo"
-            succsess_state = sGR.rule_06()
+            success_state = sGR.rule_06(sentence, pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
         elif 7 == rule_number:
             "ToDo"
-            succsess_state = sGR.rule_07()
+            success_state = sGR.rule_07()
         elif 8 == rule_number:
             "ToDo"
-            succsess_state = sGR.rule_08(pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
+            success_state = sGR.rule_08(pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
         elif 9 == rule_number:
             "ToDo"
         elif 10 == rule_number:
@@ -92,7 +92,7 @@ class SentenceGenerator:
             "ToDo"
         elif 12 == rule_number:
             "ToDo"
-            succsess_state = sGR.rule_01()
-        return succsess_state
+            success_state = sGR.rule_01()
+        return success_state
 
 
