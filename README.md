@@ -4,6 +4,17 @@ Derive the relationship of the simplified logical text
 
 Python ~ 3.6
 
+nltk
+
+spaCy <br>
+
+textacy
+
+spaCy en_core_web_lg <br>
+
+$ python3 -m spacy download en_core_web_lg
+
+
 ## Example Problem
 
 ### base problem

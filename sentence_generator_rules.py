@@ -29,8 +29,9 @@ class SentenceGeneratorRules:
             temp_input = re.findall("(I[A-Z]=\d)", inputs[l], re.IGNORECASE)  # validate whether NNP is a input
             if 0 < len(temp_input):
                 inputs_array = inputs_array + temp_input
-        inputs_and_outputs = [word for word, pos in pos_tagged_sentence if (pos == 'NNP') & (word != "Either") & (word != "Neither")]
-        # Getting I/O from pos tagged sentece
+        inputs_and_outputs = [word for word, pos in pos_tagged_sentence if
+                              (pos == 'NNP') & (word != "Either") & (word != "Neither")]
+        # Getting I/O from pos tagged sentence
         outputs_array = []
         for h in range(len(inputs_and_outputs)):
             temp_output = re.findall("(O[A-Z]=\d)", inputs_and_outputs[h], re.IGNORECASE)
@@ -338,7 +339,7 @@ class SentenceGeneratorRules:
                                  'nine': 9,
                                  'ten': 10}
                 numerical_value_of_cd = dictionary_cd[str(count_keyword[0]).lower()]
-                if numerical_value_of_cd >= total_inputs_count:
+                if numerical_value_of_cd > total_inputs_count:
                     print("Wrong on " + count_keyword[0] + " or " + sentence_keyword[
                         0] + ". Hint: It should be less value for " + count_keyword[0])
                 else:
@@ -426,8 +427,17 @@ class SentenceGeneratorRules:
         return False
 
     @staticmethod
-    def rule_07():
+    def rule_07(sentence, pos_tagged_sentence, sub_result, inputs_names, total_inputs_count):
         """ToDo"""
+        sentence_keyword = [word for word, pos in list(sub_result) if (pos == 'DT')]
+        if 1 != len(sentence_keyword):
+            print("There is more than one words which are having 'DT' tag. "
+                  "Hint: 'both' and 'trice‘ keywords at same times or there is another word for 'DT' tag")
+            return False
+        else:
+            str(sentence_keyword[0]).lower()
+            dictionary_cd = {'both': 2}
+
 
     @staticmethod
     def rule_08(pos_tagged_sentence, sub_result, inputs_names, total_inputs_count):

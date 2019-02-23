@@ -1,13 +1,2 @@
-ONLY sdfs sdfsdf IA=1 , IB=1 or IC=1 the OZ=1.
-ONLY one or both IB=1 and IA=1 then and OZ=0.
-ONLY If three buses are not Either IA=1 or IB=1 is pressed, then OZ=1.
-ONLY If three buses are not Neither IA=1 nor IB=1 is pressed, then OZ=1.
-ONLY At least one IA=1, IB=1 and IC=1 then OZ=1.
-ONLY At least two IA=1, IB=1 and IC=1 then OZ=1.
-ONLY At most one IA=1, IB=1 and IC=1 then OZ=1.
-ONLY one or more IA=1, IB=1 and IC=1 then OZ=1.
-ONLY two or more IA=1, IB=1 and IC=1 then OZ=1.
-ONLY three or more IA=1, IB=1 and IC=1 then OZ=1.
-ONLY one or less IA=1, IB=1 and IC=1 then OZ=1.
-ONLY two or less IA=1, IB=1 and IC=1 then OZ=1.
-ONLY three or less IA=1, IB=1 and IC=1 then OZ=1.
+That OZ=1 operates, when all IA=1 and IB=1 and IC=1 are switched on.
+ONLY That OZ=1 operates, when at least two are switched on.

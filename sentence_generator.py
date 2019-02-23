@@ -43,7 +43,7 @@ class SentenceGenerator:
     def rules_checker(nltk_pos):
         grammar_list = ["RULE 03: {<CD><CC><DT><NNP><CC><NNP>}", "RULE 04:{<RB|CC|NNP>+<NNP>+<CC>+<NNP>}",
                         "RULE 05: {<IN>+<JJS>+<CD>}", "RULE 06: {<CD>+<CC>+<JJR>}",
-                        "RULE 07: {<DT><NNP><CC><NNP>}", "RULE 08: {<NNP>+<CC>+<NNP>}"]
+                        "RULE 07: {<DT>+<NNP>+<CC>+<NNP>}", "RULE 08: {<NNP>+<CC>+<NNP>}"]
 
         # sub_sentence_list = []
         for grammar in grammar_list:
@@ -80,7 +80,8 @@ class SentenceGenerator:
             success_state = sGR.rule_06(sentence, pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
         elif 7 == rule_number:
             "ToDo"
-            success_state = sGR.rule_07()
+            print(sub_result, "sub result")
+            success_state = sGR.rule_07(sentence, pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)
         elif 8 == rule_number:
             "ToDo"
             success_state = sGR.rule_08(pos_tagged_sentence, sub_result, inputs_names, total_inputs_count)

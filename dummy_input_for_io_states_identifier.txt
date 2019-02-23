@@ -1,0 +1,1 @@
+The Air condition were not taken off = 0. Three sensors are not working = 1. The alarms are not kick off = 1.
