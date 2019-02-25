@@ -27,19 +27,21 @@ reference_dictionary = {'sensors': 'SensorA and SensorB and SensorC', 'alarms': 
 
 # print(len(tag_dictionary))
 
-new_dictionary = iOSF.input_output_state_matrix_creator(nlp, io_states, tag_dictionary, reference_dictionary)
-print(new_dictionary)
+i_o_status_matrix = iOSF.input_output_state_matrix_creator(nlp, io_states, tag_dictionary, reference_dictionary)
+# print(i_o_status_matrix)
 
-# io_sentences = nltk.tokenize.sent_tokenize(io_states)
-# print(io_sentences)
-# pos_tagged_io_sentences = []
-# for v in io_sentences:
-#     print(sG.nltk_applier(v))
-#     iOSF.verb_identifier(sG.nltk_applier(v))
-#     pos_tagged_io_sentences = pos_tagged_io_sentences+sG.nltk_applier(v)
-# #
-# print(tag_dictionary["IA"])
-# print(pos_tagged_io_sentences)
+# i_o_status_matrix = [['NO_REFERENCE', 'air condition', 'OV', '0', 'activate', 'False'], ['alarms', 'A1', 'OZ', '1', 'sound', 'False'], ['alarms', 'A2', 'OY', '1', 'sound', 'False'], ['alarms', 'A3', 'OX', '1', 'sound', 'False'], ['sensors', 'SensorA', 'IA', '1', 'close', 'False'], ['sensors', 'SensorB', 'IB', '1', 'close', 'False'], ['sensors', 'SensorC', 'IC', '1', 'close', 'False']]
+print(i_o_status_matrix)
+
+logic_sentences = open('dummy_input_first.txt')
+logic_sentences = logic_sentences.read()
+noun_verb_mapper_set = [[['IC=1/0 or IB=1/0 is opened', 'IC=1/0 and IC=1/0 is opened'], ['OZ=1/0 is sounded']],
+                        [['IB=1/0 or IA=1/0 is opened'], ['OY=1/0 is sounded']],
+                        [['IA=1/0 and IB=1/0 IC=1/0 are opened'], ['OZ=1/0 is sounded']]]
+# print(noun_verb_mapper_set)
+input_output_status_added_sentences = iOSF.one_or_zero_applier_for_logic_sentence(nlp, logic_sentences, i_o_status_matrix, tag_dictionary, reference_dictionary, noun_verb_mapper_set)
+print(input_output_status_added_sentences,)
+
 
 ######################################################################################################### First Phase #
 
