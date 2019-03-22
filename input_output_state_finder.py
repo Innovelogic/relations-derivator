@@ -28,20 +28,20 @@ class InputsOutputsStateFinder:
                 io_states_current = token.text
         return io_states_current
 
-    @staticmethod
-    def not_value_finder(nlp, verb_of_sentence):
-        """
-        getting not availability state of each sentence
-        :param nlp:
-        :param verb_of_sentence:
-        :return:
-        """
-        doc_verb = nlp(verb_of_sentence)
-        not_availability = False
-        for token in doc_verb:
-            if token.text == "not" and token.tag_ == "RB" and token.pos_ == "ADV":
-                not_availability = True
-        return not_availability
+    # @staticmethod
+    # def not_value_finder(nlp, verb_of_sentence):
+    #     """
+    #     getting not availability state of each sentence
+    #     :param nlp:
+    #     :param verb_of_sentence:
+    #     :return:
+    #     """
+    #     doc_verb = nlp(verb_of_sentence)
+    #     not_availability = False
+    #     for token in doc_verb:
+    #         if token.text == "not" and token.tag_ == "RB" and token.pos_ == "ADV":
+    #             not_availability = True
+    #     return not_availability
 
     @staticmethod
     def phrasal_verb_finder(nlp, complex_verb):
@@ -150,6 +150,120 @@ class InputsOutputsStateFinder:
                     verb = verb + [non_phrasal_verb]
         return verb, not_availability
 
+#  ##############################################################################################################
+    @staticmethod
+    def not_value_finder(negation_word):
+        """
+        :param negation_word:
+        :return:
+        """
+        """ToDo : if not have space on the begin it should remove"""
+        if negation_word.lower() == "not":
+            return True
+        elif negation_word == "":
+            return False
+        else:
+            assert True, "In the I/O statements have wrong type negation"
+
+    @staticmethod
+    def phrasal_verb_verifier_or_verb_part_extractor(nlp, verb):
+        verified_verb_lemma = []
+
+        splited_verb = str(verb.strip()).split(" ")
+        if 2 == len(splited_verb):  # must be a phrasal verb
+            lemma_of_first_verb = WordNetLemmatizer().lemmatize(splited_verb[0], 'v')
+            lemma_phrasal_verb = lemma_of_first_verb + "_" + splited_verb[1]
+            for syn in wordnet.synsets(lemma_phrasal_verb, pos=wordnet.VERB):
+                if 0 < len(syn.lemmas()):
+                    return verb
+            return splited_verb[0]
+        elif 2 < len(splited_verb):
+            print(" Wrong format of the verb part : ", verb, ". This is the verb after splited by space : ",
+                  splited_verb)
+            assert True, "Please change it on given scenario and re run the process"
+        elif 1 == len(splited_verb):
+            return splited_verb[0]
+        else:
+            print(" There is no verb in ", verb, "Hint: Accidentally send a " " or likewise string as verb.")
+            assert True, "Please change it on given scenario and re run the process"
+
+    @staticmethod
+    def identify_io_verbs(nlp, sentences):
+        """
+        :param nlp:
+        :param sentences:
+        :return:
+        """
+        sentences = sent_tokenize(sentences)
+        grammar = r"""
+                  GR : {<RB>*<VB|VBN|JJ|VBG|VBZ|VBP|VBD>+<IN|RP>*} 
+                  """
+        # GR : {<RB>*<VB|VBN|JJ|VBG|VBZ|VBP>+<IN|RP>*}
+        io_sent_verbs = []
+        for sent in sentences:
+            sample = sent.split('=')
+            if 2 != len(sample):
+                print("Wrong I/O format in the io sentence : ", sent)
+                return
+            sent_verified = sample[0]
+
+            words = word_tokenize(sent_verified)
+            tagged = pos_tag(words)
+            cp = RegexpParser(grammar)
+            t = cp.parse(tagged)
+            # t.draw()
+            negate = ''
+            verb = ''
+            verbs = []
+            for s in t.subtrees():
+                is_phrasal = False
+                if s.label() == "GR":
+                    for token in s.leaves():
+                        if token[0] == 'is' or token[0] == 'are' or token[0] == 'does' or token[0] == 'do':
+                            continue
+                        elif token[1] == 'RB':
+                            negate = token[0]
+                        elif token[0] != "=":
+                            verb = verb + " " + token[0]
+
+            verb = InputsOutputsStateFinder.phrasal_verb_verifier_or_verb_part_extractor(nlp, verb)
+            verbs.append([negate, verb])
+            io_sent_verbs.append(verbs)
+        return io_sent_verbs
+
+    @staticmethod
+    def matrix_writer(io_details_list, written_number_of_table, nn, nnp, tag_key, io_value, verb, negation):
+        io_details_list[written_number_of_table][0] = nn
+        io_details_list[written_number_of_table][1] = nnp
+        io_details_list[written_number_of_table][2] = tag_key
+        io_details_list[written_number_of_table][3] = io_value
+        io_details_list[written_number_of_table][4] = verb
+        io_details_list[written_number_of_table][5] = negation
+        return io_details_list
+
+    @staticmethod
+    def initial_lists_and_dictionaries_of_io_state_matrix_creator(nlp, tag_dictionary, reference_dictionary):
+        tag_key_not_completed = []
+        tag_value_not_completed = []
+        tag_dictionary_key_list = []
+        value_dictionary_of_tag_dictionary = {}
+        for k, v in tag_dictionary.items():
+            tag_dictionary_key_list = tag_dictionary_key_list + [str(k).lower()]
+            value_dictionary_of_tag_dictionary[str(v).lower()] = k
+            tag_key_not_completed.append(str(k).lower())
+            tag_value_not_completed.append(str(v).lower())
+
+        reference_dictionary_key_list = []
+        for k, v in reference_dictionary.items():
+            reference_dictionary_key_list = reference_dictionary_key_list + [str(k).lower()]
+
+        list_of_all = []
+        list_of_all = list_of_all + [tag_key_not_completed]
+        list_of_all = list_of_all + [tag_value_not_completed]
+        list_of_all = list_of_all + [tag_dictionary_key_list]
+        list_of_all = list_of_all + [reference_dictionary_key_list]
+        return list_of_all, value_dictionary_of_tag_dictionary
+
     @staticmethod
     def input_output_state_matrix_creator(nlp, io_states_sentences, tag_dictionary, reference_dictionary):
         """
@@ -160,92 +274,233 @@ class InputsOutputsStateFinder:
         :param reference_dictionary:
         :return:
         """
-        io_details_list = [["" for x in range(6)] for y in range(
-            len(tag_dictionary))]  # example tuple [[NN], [NNP], [tag_key], [I/O_State], [Verb], [not on the verb]]
+        io_details_list = [["" for x in range(6)] for y in range(len(tag_dictionary))]
+        # example tuple [[NN], [NNP], [tag_key], [I/O_State], [Verb], [not on the verb]]
 
-        tag_dictionary_key_list = []
-        for k, v in tag_dictionary.items():
-            tag_dictionary_key_list = tag_dictionary_key_list+[str(k).lower()]
+        list_of_initial_lists, value_dictionary_of_tag_dictionary = \
+            InputsOutputsStateFinder.initial_lists_and_dictionaries_of_io_state_matrix_creator(nlp, tag_dictionary,
+                                                                                               reference_dictionary)
 
-        reference_dictionary_key_list = []
-        for k, v in reference_dictionary.items():
-            reference_dictionary_key_list = reference_dictionary_key_list+[str(k).lower()]
+        tag_key_not_completed = list_of_initial_lists[0]
+        tag_value_not_completed = list_of_initial_lists[1]
+        tag_dictionary_key_list = list_of_initial_lists[2]
+        reference_dictionary_key_list = list_of_initial_lists[3]
 
         written_number_of_table = 0
 
         io_sentences = nltk.tokenize.sent_tokenize(io_states_sentences)
 
+        tag_key_completed = []
+
         for checking_sentence in range(len(io_sentences)):
             if str(io_sentences[checking_sentence][0]).islower():
                 print(io_sentences[checking_sentence][0], "letter must be capital in the sentence : ",
                       io_sentences[checking_sentence], " of the I/O_Status.")
-                return io_details_list
+                assert True, "Correct the previous error on the scenario and run. "
 
         for i in range(len(io_sentences)):
+            # print()
             doc_sentence = nlp(io_sentences[i])
             # getting I/O state value for relevant sentence. ex :- value is 1
             io_states_current = InputsOutputsStateFinder.one_zero_finder(nlp, io_sentences[i])
 
             # getting verb statement. limitations on the phrasal verbs. # "Not" included. "ToDo"
             # should implement not finder within this step
-            verb, not_availability = InputsOutputsStateFinder.verb_and_not_word_availability_finder(nlp,
-                                                                                                    io_sentences[i])
+            verb_and_not_list = InputsOutputsStateFinder.identify_io_verbs(nlp, io_sentences[i])
 
+            not_availability = InputsOutputsStateFinder.not_value_finder(verb_and_not_list[0][0][0])
+
+            verb = [verb_and_not_list[0][0][1]]
             if 1 < len(verb):
-                print(
-                    "There are more than one sentences in the sentence or sentences not in "
-                    "the right format in the sentence : ",
-                    io_sentences[i], " Hint 1: Sensor works sounds Hint 2: the ........")
-                return
+                print("There are more than one sentences in the sentence or sentences not in the "
+                      "right format in the sentence : ", io_sentences[i],
+                      " Hint 1: Sensor works sounds Hint 2: Sometimes sentence starts with lower "
+                      "case letter Hint 3: ................ please change it", verb)
+                assert True, "Please correct the above limitation"
             elif 0 == len(verb):
                 print("There is no verb in the sentence :", io_sentences[i])
-                return
-            tag_key_completed = []
-            verb = verb[0]  # getting verb sub list from the string list list
-            if written_number_of_table > len(tag_dictionary)-1:
+                assert True, "Please correct the above limitation"
+
+            if written_number_of_table > len(tag_dictionary) - 1:
                 print("There is more sentence in the I/O_Status")
-                return
-            for ref in range(len(reference_dictionary_key_list)):
-                if reference_dictionary_key_list[ref] in str(
-                        io_sentences[i]).lower():  # if entity on the reference dictionary
-                    split_tag_key_temp = str(reference_dictionary[reference_dictionary_key_list[ref]]).split(' and ')
-                    for n in range(len(split_tag_key_temp)):
-                        io_details_list[written_number_of_table][0] = reference_dictionary_key_list[ref]
-                        io_details_list[written_number_of_table][1] = split_tag_key_temp[n]
-                        io_details_list[written_number_of_table][2] = tag_dictionary[split_tag_key_temp[n]]
-                        io_details_list[written_number_of_table][3] = io_states_current
-                        io_details_list[written_number_of_table][4] = verb[0]
-                        io_details_list[written_number_of_table][5] = str(not_availability)
-                        tag_key_completed = tag_key_completed + [split_tag_key_temp[n]]
-                        written_number_of_table = written_number_of_table + 1
-                else:
+                assert True, "Please correct the above limitation"
+            if 0 != len(reference_dictionary):
+                if 0 == len(reference_dictionary_key_list):
                     if 0 == len(tag_key_completed):
                         for tag in range(len(tag_dictionary_key_list)):
-                            if tag_dictionary_key_list[tag] in str(io_sentences[i]).lower():
-                                io_details_list[written_number_of_table][0] = "NO_REFERENCE"
-                                io_details_list[written_number_of_table][1] = tag_dictionary_key_list[tag]
-                                io_details_list[written_number_of_table][2] = tag_dictionary[
-                                    tag_dictionary_key_list[tag]]
-                                io_details_list[written_number_of_table][3] = io_states_current
-                                io_details_list[written_number_of_table][4] = verb[0]
-                                io_details_list[written_number_of_table][5] = str(not_availability)
+
+                            temp_entity = \
+                                re.findall(tag_dictionary[str(tag_dictionary_key_list[tag]).upper()], io_sentences[i],
+                                           re.IGNORECASE)
+
+                            if 0 != len(temp_entity):
+
+                                io_details_list = \
+                                    InputsOutputsStateFinder.matrix_writer(io_details_list,
+                                                                           written_number_of_table,
+                                                                           "NO_REFERENCE",
+                                                                           tag_dictionary[
+                                                                               tag_dictionary_key_list[tag].upper()],
+                                                                           tag_dictionary_key_list[tag].upper(),
+                                                                           io_states_current, verb[0],
+                                                                           str(not_availability))
+
                                 tag_key_completed = tag_key_completed + [tag_dictionary_key_list[tag]]
+
+                                tag_value_not_completed.remove(
+                                    str(tag_dictionary[str(tag_dictionary_key_list[tag]).upper()]).lower())
                                 written_number_of_table = written_number_of_table + 1
                     else:
                         for competed_tag in range(len(tag_key_completed)):
                             if not tag_key_completed[competed_tag] in str(io_sentences[i]).lower():
                                 for tag in range(len(tag_dictionary_key_list)):
                                     if tag_dictionary_key_list[tag] in str(io_sentences[i]).lower():
-                                        io_details_list[written_number_of_table][0] = "NO_REFERENCE"
-                                        io_details_list[written_number_of_table][1] = tag_dictionary_key_list[tag]
-                                        io_details_list[written_number_of_table][2] = tag_dictionary[
-                                            tag_dictionary_key_list[tag]]
-                                        io_details_list[written_number_of_table][3] = io_states_current
-                                        io_details_list[written_number_of_table][4] = verb[0]
-                                        io_details_list[written_number_of_table][5] = str(not_availability)
+
+                                        io_details_list = \
+                                            InputsOutputsStateFinder.matrix_writer(io_details_list,
+                                                                                   written_number_of_table,
+                                                                                   "NO_REFERENCE",
+                                                                                   tag_dictionary[
+                                                                                       tag_dictionary_key_list[
+                                                                                           tag].upper()],
+                                                                                   tag_dictionary_key_list[
+                                                                                       tag].upper(),
+                                                                                   io_states_current, verb[0],
+                                                                                   str(not_availability))
+
                                         tag_key_completed = tag_key_completed + [tag_dictionary_key_list[tag]]
+                                        tag_value_not_completed.remove(tag_dictionary_key_list[tag])
                                         written_number_of_table = written_number_of_table + 1
+                else:
+                    for ref in range(len(reference_dictionary_key_list)):
+                        if reference_dictionary_key_list[ref] in str(
+                                io_sentences[i]).lower():  # if entity on the reference dictionary
+                            split_tag_key_temp = str(reference_dictionary[reference_dictionary_key_list[ref]]).split(
+                                ' and ')
+                            for n in range(len(split_tag_key_temp)):
+                                if split_tag_key_temp[n].lower() in tag_value_not_completed:
+
+                                    io_details_list = \
+                                        InputsOutputsStateFinder.matrix_writer(io_details_list,
+                                                                               written_number_of_table,
+                                                                               reference_dictionary_key_list[ref],
+                                                                               split_tag_key_temp[n],
+                                                                               value_dictionary_of_tag_dictionary[
+                                                                                   split_tag_key_temp[n].lower()],
+                                                                               io_states_current, verb[0],
+                                                                               str(not_availability))
+
+                                    tag_key_completed = tag_key_completed + [split_tag_key_temp[n]]
+
+                                    tag_value_not_completed.remove(split_tag_key_temp[n].lower())
+                                    written_number_of_table = written_number_of_table + 1
+                        else:
+                            if 0 == len(tag_key_completed):
+                                for tag in range(len(tag_dictionary_key_list)):
+                                    if tag_dictionary_key_list[tag] in str(io_sentences[i]).lower():
+
+                                        io_details_list = \
+                                            InputsOutputsStateFinder.matrix_writer(io_details_list,
+                                                                                   written_number_of_table,
+                                                                                   "NO_REFERENCE",
+                                                                                   tag_dictionary[
+                                                                                       tag_dictionary_key_list[
+                                                                                           tag].upper()],
+                                                                                   tag_dictionary_key_list[
+                                                                                       tag].upper(),
+                                                                                   io_states_current, verb[0],
+                                                                                   str(not_availability))
+
+                                        tag_key_completed = tag_key_completed + [tag_dictionary_key_list[tag]]
+
+                                        tag_value_not_completed.remove(
+                                            str(tag_dictionary[tag_dictionary_key_list[tag].upper()]).lower())
+                                        written_number_of_table = written_number_of_table + 1
+                            else:
+                                for competed_tag in range(len(tag_key_completed)):
+                                    if not tag_key_completed[competed_tag] in str(io_sentences[i]).lower():
+                                        for tag in range(len(tag_dictionary_key_list)):
+
+                                            if str(tag_dictionary[tag_dictionary_key_list[tag].upper()]).lower() \
+                                                    in tag_value_not_completed:
+
+                                                if tag_dictionary_key_list[tag] in str(io_sentences[i]).lower():
+
+                                                    io_details_list = \
+                                                        InputsOutputsStateFinder.matrix_writer(
+                                                            io_details_list, written_number_of_table,
+                                                            "NO_REFERENCE",
+                                                            tag_dictionary[tag_dictionary_key_list[tag].upper()],
+                                                            tag_dictionary_key_list[tag].upper(),
+                                                            io_states_current, verb[0],
+                                                            str(not_availability))
+
+                                                    tag_key_completed = tag_key_completed + \
+                                                                        [tag_dictionary_key_list[tag]]
+
+                                                    tag_value_not_completed.remove(tag_dictionary_key_list[tag].upper())
+                                                    written_number_of_table = written_number_of_table + 1
+
+                if 0 < len(tag_value_not_completed):
+                    tag_value_not_completed_will_be_remove = []
+                    for value in range(len(tag_value_not_completed)):
+
+                        if tag_value_not_completed[value] in str(io_sentences[i]).lower():
+                            io_details_list = \
+                                InputsOutputsStateFinder.matrix_writer(io_details_list,
+                                                                       written_number_of_table,
+                                                                       "NO_REFERENCE",
+                                                                       tag_dictionary[str(tag_dictionary_key_list[
+                                                                                              tag]).upper()],
+                                                                       str(tag_dictionary_key_list[
+                                                                               tag]).upper(),
+                                                                       io_states_current, verb[0],
+                                                                       str(not_availability))
+
+                            tag_key_completed = tag_key_completed + [tag_dictionary_key_list[tag]]
+
+                            tag_value_not_completed_will_be_remove.append(
+                                str(tag_dictionary[str(tag_dictionary_key_list[tag]).upper()]).lower())
+
+                            written_number_of_table = written_number_of_table + 1
+                    if 0 < len(tag_value_not_completed_will_be_remove):
+                        for l in range(len(tag_value_not_completed_will_be_remove)):
+                            tag_value_not_completed.remove(tag_value_not_completed_will_be_remove[l])
+            else:
+                if 0 < len(tag_value_not_completed):
+                    tag_value_not_completed_will_be_remove = []
+                    for value in range(len(tag_value_not_completed)):
+
+                        if tag_value_not_completed[value] in str(io_sentences[i]).lower():
+                            io_details_list = \
+                                InputsOutputsStateFinder.matrix_writer(io_details_list,
+                                                                       written_number_of_table,
+                                                                       "NO_REFERENCE",
+                                                                       tag_dictionary[
+                                                                           value_dictionary_of_tag_dictionary[
+                                                                               tag_value_not_completed[value]]],
+                                                                       value_dictionary_of_tag_dictionary[
+                                                                           tag_value_not_completed[value]],
+                                                                       io_states_current, verb[0],
+                                                                       str(not_availability))
+
+                            tag_key_completed = \
+                                tag_key_completed + \
+                                [value_dictionary_of_tag_dictionary[tag_value_not_completed[value]]]
+
+                            tag_value_not_completed_will_be_remove.append(str(tag_dictionary[
+                                                                                  value_dictionary_of_tag_dictionary[
+                                                                                      tag_value_not_completed[
+                                                                                          value]]]).lower())
+                            written_number_of_table = written_number_of_table + 1
+
+                    if 0 < len(tag_value_not_completed_will_be_remove):
+                        for l in range(len(tag_value_not_completed_will_be_remove)):
+                            tag_value_not_completed.remove(tag_value_not_completed_will_be_remove[l])
+
         return io_details_list
+
+#  ################################################################################################################
 
     # @staticmethod
     # def chunk_by_verb_and_relevant(text):

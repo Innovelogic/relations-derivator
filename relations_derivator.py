@@ -19,28 +19,26 @@ start_time = time.time()
 nlp = en_core_web_sm.load()
 print(round((time.time()-start_time)*1000), "ms")
 
-io_states = open('dummy_input_for_io_states_identifier.txt')
-io_states = io_states.read()
+io_states = "Sensors indicate cold = 1. Heaters are activated = 1."
 
-tag_dictionary = {'SensorA': 'IA', 'SensorB': 'IB', 'SensorC': 'IC', 'A1': 'OZ', 'A2': 'OY', 'A3': 'OX', 'air condition': 'OV'}
-reference_dictionary = {'sensors': 'SensorA and SensorB and SensorC', 'alarms': 'A1 and A2 and A3'}
+tag_dictionary = {'IA': 'T4', 'IB': 'T1', 'IC': 'T3', 'ID': 'T2', 'OZ': 'H2', 'OY': 'H3'}
+reference_dictionary = {'heaters': 'H1 and H2 and H3', 'sensors': 'T1 and T2 and T3 and T4'}
 
 # print(len(tag_dictionary))
 
 i_o_status_matrix = iOSF.input_output_state_matrix_creator(nlp, io_states, tag_dictionary, reference_dictionary)
-# print(i_o_status_matrix)
+print("I O Status Matrix : ", i_o_status_matrix)
 
-# i_o_status_matrix = [['NO_REFERENCE', 'air condition', 'OV', '0', 'activate', 'False'], ['alarms', 'A1', 'OZ', '1', 'sound', 'False'], ['alarms', 'A2', 'OY', '1', 'sound', 'False'], ['alarms', 'A3', 'OX', '1', 'sound', 'False'], ['sensors', 'SensorA', 'IA', '1', 'close', 'False'], ['sensors', 'SensorB', 'IB', '1', 'close', 'False'], ['sensors', 'SensorC', 'IC', '1', 'close', 'False']]
-print(i_o_status_matrix)
 
-logic_sentences = open('dummy_input_first.txt')
-logic_sentences = logic_sentences.read()
-noun_verb_mapper_set = [[['IC=1/0 or IB=1/0 is opened', 'IC=1/0 and IC=1/0 is opened'], ['OZ=1/0 is sounded']],
-                        [['IB=1/0 or IA=1/0 is opened'], ['OY=1/0 is sounded']],
-                        [['IA=1/0 and IB=1/0 IC=1/0 are opened'], ['OZ=1/0 is sounded']]]
-# print(noun_verb_mapper_set)
-input_output_status_added_sentences = iOSF.one_or_zero_applier_for_logic_sentence(nlp, logic_sentences, i_o_status_matrix, tag_dictionary, reference_dictionary, noun_verb_mapper_set)
-print(input_output_status_added_sentences,)
+# logic_sentences = "When at least two IB=1/0 and ID=1/0 and IC=1/0 and IA=1/0 are indicated cold, then OZ=1/0 and OY=1/0 are activated. If neither IB=1/0 and ID=1/0 and IC=1/0 and IA=1/0 are indicated cold, then OZ=1/0 is activated. If ID=1/0 is indicated cold, then OY=1/0 is inactivated."
+
+# noun_verb_mapper_set = [[[' IB=1/0 and ID=1/0 and IC=1/0 and IA=1/0 are indicated'], [' OZ=1/0 and OY=1/0 are activated']], [[' IB=1/0 and ID=1/0 and IC=1/0 and IA=1/0 are indicated'], [' OZ=1/0 is activated']], [[' ID=1/0 is indicated'], [' OY=1/0 is inactivated']]]
+
+# inputs = 4
+# outputs = 2
+
+# input_output_status_added_sentences = iOSF.one_or_zero_applier_for_logic_sentence(nlp, logic_sentences, i_o_status_matrix, tag_dictionary, reference_dictionary, noun_verb_mapper_set)
+# print(input_output_status_added_sentences,)
 
 
 ######################################################################################################### First Phase #
