@@ -30,15 +30,16 @@ i_o_status_matrix = iOSF.input_output_state_matrix_creator(nlp, io_states, tag_d
 print("I O Status Matrix : ", i_o_status_matrix)
 
 
-# logic_sentences = "When at least two IB=1/0 and ID=1/0 and IC=1/0 and IA=1/0 are indicated cold, then OZ=1/0 and OY=1/0 are activated. If neither IB=1/0 and ID=1/0 and IC=1/0 and IA=1/0 are indicated cold, then OZ=1/0 is activated. If ID=1/0 is indicated cold, then OY=1/0 is inactivated."
+logic_sentences = "When at least two IB=1/0 and ID=1/0 and IC=1/0 and IA=1/0 are indicated cold, then OZ=1/0 and OY=1/0 are activated. If neither IB=1/0 and ID=1/0 and IC=1/0 and IA=1/0 are indicated cold, then OZ=1/0 is activated. If ID=1/0 is indicated cold, then OY=1/0 is inactivated."
 
-# noun_verb_mapper_set = [[[' IB=1/0 and ID=1/0 and IC=1/0 and IA=1/0 are indicated'], [' OZ=1/0 and OY=1/0 are activated']], [[' IB=1/0 and ID=1/0 and IC=1/0 and IA=1/0 are indicated'], [' OZ=1/0 is activated']], [[' ID=1/0 is indicated'], [' OY=1/0 is inactivated']]]
+noun_verb_mapper_set = [[[' IB=1/0 and ID=1/0 and IC=1/0 and IA=1/0 are indicated'], [' OZ=1/0 and OY=1/0 are activated']], [[' IB=1/0 and ID=1/0 and IC=1/0 and IA=1/0 are indicated'], [' OZ=1/0 is activated']], [[' ID=1/0 is indicated'], [' OY=1/0 is inactivated']]]
 
-# inputs = 4
-# outputs = 2
+inputs = 4
+outputs = 2
 
-# input_output_status_added_sentences = iOSF.one_or_zero_applier_for_logic_sentence(nlp, logic_sentences, i_o_status_matrix, tag_dictionary, reference_dictionary, noun_verb_mapper_set)
-# print(input_output_status_added_sentences,)
+input_output_status_added_sentences = \
+    iOSF.one_or_zero_applier_for_logic_sentence(nlp, logic_sentences, i_o_status_matrix, noun_verb_mapper_set)
+print(input_output_status_added_sentences)
 
 
 ######################################################################################################### First Phase #

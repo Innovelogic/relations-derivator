@@ -722,30 +722,159 @@ class InputsOutputsStateFinder:
         input_or_output_sentence_part = InputsOutputsStateFinder.value_replacer(nlp, actual_complex_verb_list, input_or_output_sentence_part, i_o_status_matrix)
         return input_or_output_sentence_part
 
+#  ####################################################################################################################
     @staticmethod
-    def i_0_applier_for_output_part():
-        output_sentence_part = ''
-        return output_sentence_part
+    def verb_or_phrasal_verb_lemmatizer(verb):
+        lemma_verb_verified = ''
+        verb = verb.strip()
+        splited_verb = str(verb).split(" ")
+        lemma_verb = WordNetLemmatizer().lemmatize(splited_verb[0], 'v')
+        if 0 == len(lemma_verb):  # addressing limitation of the verb lemmatizer of wordnet.
+            print(" There is a limitation when finding lemmatized verb from : ", splited_verb[0])
+            assert True, "Correct the above limitation"
+        if 1 == len(splited_verb):
+            lemma_verb_verified = lemma_verb
+        elif 2 == len(splited_verb):
+            lemma_verb_verified = lemma_verb + "_" + splited_verb[1]
+        return lemma_verb_verified
 
     @staticmethod
-    def one_or_zero_applier_for_logic_sentence(nlp, logic_sentences, i_o_status_matrix, tag_dictionary, reference_dictionary, noun_verb_map_set):
+    def entity_values_generator_sent_part(nlp, sentence_part, verb_noun_map_part, verb_and_negation_list,
+                                          i_o_status_matrix):
+        value_replaced_map = []
+
+        tags_list = []
+        inputs_list = re.findall("(I[A-Z]=1/0)", verb_noun_map_part, re.IGNORECASE)
+        outputs_list = re.findall("(O[A-Z]=1/0)", verb_noun_map_part, re.IGNORECASE)
+        if 0 == len(inputs_list):
+            tags_list = outputs_list
+        elif 0 == len(outputs_list):
+            tags_list = inputs_list
+
+        negation_map_part = ''
+        if '' == verb_and_negation_list[0]:
+            negation_map_part = 'False'
+        elif 'not' == verb_and_negation_list[0].lower():
+            negation_map_part = 'True'
+        verb_map_part = verb_and_negation_list[1]
+        io_generated_map_part = verb_noun_map_part
+        for j in range(len(tags_list)):
+            entity_tag_temp = str(tags_list[j][0:2])
+
+            verb_io, not_availability_io, value_io = \
+                InputsOutputsStateFinder.matching_verb_and_not_value_from_io_matrix(entity_tag_temp, i_o_status_matrix)
+
+            lemma_verb_map_part = InputsOutputsStateFinder.verb_or_phrasal_verb_lemmatizer(verb_map_part)
+            lemma_verb_io = InputsOutputsStateFinder.verb_or_phrasal_verb_lemmatizer(verb_io)
+            map_part_not_availability = negation_map_part
+            if lemma_verb_io == lemma_verb_map_part:
+                if str(not_availability_io) == str(map_part_not_availability):
+                    print("same state")
+                    final_io_state = value_io
+
+                    io_generated_map_part = \
+                        InputsOutputsStateFinder.io_value_replacer_of_map(entity_tag_temp,
+                                                                          final_io_state,
+                                                                          io_generated_map_part)
+
+                else:
+                    print("inverse input")
+                    final_io_state = InputsOutputsStateFinder.io_status_revers(value_io)
+
+                    io_generated_map_part = \
+                        InputsOutputsStateFinder.io_value_replacer_of_map(entity_tag_temp,
+                                                                          final_io_state,
+                                                                          io_generated_map_part)
+            else:
+                synonyms, antonyms = InputsOutputsStateFinder.synonyms_antonyms_of_verb(lemma_verb_io)
+                for i in range(len(synonyms)):
+                    if synonyms[i] == lemma_verb_map_part:
+                        if str(not_availability_io) == str(map_part_not_availability):
+                            print("same state")
+                            final_io_state = value_io
+
+                            io_generated_map_part = \
+                                InputsOutputsStateFinder.io_value_replacer_of_map(entity_tag_temp,
+                                                                                  final_io_state,
+                                                                                  io_generated_map_part)
+                            break
+                        else:
+                            print("inverse statement")
+                            final_io_state = InputsOutputsStateFinder.io_status_revers(value_io)
+
+                            io_generated_map_part = \
+                                InputsOutputsStateFinder.io_value_replacer_of_map(entity_tag_temp,
+                                                                                  final_io_state,
+                                                                                  io_generated_map_part)
+                            break
+                for i in range(len(antonyms)):
+                    if antonyms[i] == lemma_verb_map_part:
+                        if str(not_availability_io) != str(map_part_not_availability):
+                            print("same statement")
+                            final_io_state = value_io
+
+                            io_generated_map_part = \
+                                InputsOutputsStateFinder.io_value_replacer_of_map(entity_tag_temp,
+                                                                                  final_io_state,
+                                                                                  io_generated_map_part)
+                            break
+                        else:
+                            print("inverse statement")
+                            final_io_state = InputsOutputsStateFinder.io_status_revers(value_io)
+
+                            io_generated_map_part = \
+                                InputsOutputsStateFinder.io_value_replacer_of_map(entity_tag_temp,
+                                                                                  final_io_state,
+                                                                                  io_generated_map_part)
+                            break
+        sentence_part = str(sentence_part).replace(verb_noun_map_part, io_generated_map_part)
+        return sentence_part
+
+    @staticmethod
+    def identify_map_verbs_with_negation(nlp, sentences):
+        """Errors are happens when sentences are list type, hint: extracts string from the list"""
+        sentences = sent_tokenize(sentences)
+        grammar = r"""
+                  GR : {<RB>*<VB|VBN|JJ|VBG|VBZ|VBP|VBD>+<IN|RP>*} 
+                  """
+        # GR : {<RB>*<VB|VBN|JJ|VBG|VBZ|VBP>+<IN|RP>*}
+        map_part_verb_and_negation = []
+        for sent in sentences:
+            # sample = sent.split('=')
+            words = word_tokenize(sent)
+            tagged = pos_tag(words)
+            cp = RegexpParser(grammar)
+            t = cp.parse(tagged)
+            # t.draw()
+            negate = ''
+            verb = ''
+            verbs = []
+            for s in t.subtrees():
+                is_phrasal = False
+                if s.label() == "GR":
+                    for token in s.leaves():
+                        if token[0] == 'is' or token[0] == 'are' or token[0] == 'does' or token[0] == 'do':
+                            continue
+                        elif token[1] == 'RB':
+                            negate = token[0]
+                        elif token[0] != "=":
+                            verb = verb + " " + token[0]
+            verb = InputsOutputsStateFinder.phrasal_verb_verifier_or_verb_part_extractor(nlp, verb)
+            verbs.append([negate, verb])
+            map_part_verb_and_negation.append(verbs)
+        return map_part_verb_and_negation.pop()
+
+    @staticmethod
+    def one_or_zero_applier_for_logic_sentence(nlp, logic_sentences, i_o_status_matrix, noun_verb_map_set):
         completed_logic_sentences = ''
-        old_new_map_lists = ''
-        replaced_sub_input = ''
-        replaced_sub_output = ''
         tokenize_sentences = nltk.tokenize.sent_tokenize(logic_sentences)
-        # print(len(noun_verb_map_set))
-        # print(len(tokenize_sentences))
         if len(tokenize_sentences) != len(noun_verb_map_set):
             print("noun_verb_map_set length not match with sentences count")
             return
         for i in range(len(tokenize_sentences)):
-            input_part = ''
-            outputs_part = ''
-            # print(tokenize_sentences[i])
+            completed_logic_sentence = ''
             splited_sentence = tokenize_sentences[i].split(",")
             noun_verb_map_set_of_each_sentence = noun_verb_map_set[i]
-            # print(splited_sentence[0])
             if 2 < len(splited_sentence):
                 print(" Two or more ',' not allow in the logical sentence : ", tokenize_sentences[i])
                 return
@@ -753,50 +882,65 @@ class InputsOutputsStateFinder:
                 print(" There is no any ',' in the logical sentence : ", tokenize_sentences[i])
                 return
             else:
+                input_count_of_first_part = len(re.findall("(I[A-Z]=1/0)", splited_sentence[0], re.IGNORECASE))
+                input_count_of_second_part = len(re.findall("(I[A-Z]=1/0)", splited_sentence[1], re.IGNORECASE))
+                output_count_of_first_part = len(re.findall("(O[A-Z]=1/0)", splited_sentence[0], re.IGNORECASE))
+                output_count_of_second_part = len(re.findall("(O[A-Z]=1/0)", splited_sentence[1], re.IGNORECASE))
+                if (0 < input_count_of_first_part and 0 < output_count_of_first_part) or (
+                        0 < input_count_of_second_part and 0 < output_count_of_second_part):
+                    print("Inputs and outputs in the same side in the logic sentence : ", tokenize_sentences[i])
+                    return
+
                 for part_of_logic_sentence in range(len(splited_sentence)):
-                    inputs_list = re.findall("(I[A-Z]=1/0)", splited_sentence[part_of_logic_sentence], re.IGNORECASE)
+                    completed_logic_sentence_part = ''
+                    inputs_list = re.findall("(I[A-Z]=1/0)", splited_sentence[part_of_logic_sentence],
+                                             re.IGNORECASE)
                     # "(I[A-Z]=\d[,and ])" when IA = 1 (No need)
-                    outputs_list = re.findall("(O[A-Z]=1/0)", splited_sentence[part_of_logic_sentence], re.IGNORECASE)
+                    outputs_list = re.findall("(O[A-Z]=1/0)", splited_sentence[part_of_logic_sentence],
+                                              re.IGNORECASE)
                     # "(O[A-Z]=\d[,and ])" when OZ = 1 (No need)
                     if 0 == len(inputs_list) and 0 == len(outputs_list):
                         print("There is no any tagged input or output in the sentence : ", tokenize_sentences[i])
                         return
-                    elif 0 == len(outputs_list) and 0 < len(inputs_list):
-                        # print(noun_verb_map_set_of_each_sentence[0], "0000000000000000000000000000000000000000000")
-                        input_verb_map_part = InputsOutputsStateFinder.verbs_finder_of_mapper(nlp, noun_verb_map_set_of_each_sentence[0])
-                        # print(input_verb_map_part)
-                        value_replaced_map_input_part = InputsOutputsStateFinder.value_replacer_of_mapper(nlp, noun_verb_map_set_of_each_sentence[0], input_verb_map_part, i_o_status_matrix)
-                        # print(value_replaced_map_input_part)
-                        # print(noun_verb_map_set_of_each_sentence[part_of_logic_sentence][0], "30")
-                        # print(value_replaced_map_input_part[0], "40")
-                        # print(noun_verb_map_set_of_each_sentence[0][0], "lllllllllllllllllllllllllll")
-                        # print(splited_sentence[part_of_logic_sentence], "oooooooooooooooooooooooooooooooooooooooo")
-                        for s in range(len(value_replaced_map_input_part)):
-                            # print("hi")
-                            # print(splited_sentence[part_of_logic_sentence], "1")
-                            # print(noun_verb_map_set_of_each_sentence[part_of_logic_sentence][s], "2")
-                            # print(value_replaced_map_input_part[0], "3")
-                            replaced_sub_input = str(splited_sentence[part_of_logic_sentence]).replace(str(noun_verb_map_set_of_each_sentence[part_of_logic_sentence][s]),
-                                                                                                       str(value_replaced_map_input_part[s]))
+                    if 0 < len(inputs_list) and 0 < len(outputs_list):
+                        print("There are inputs and outputs in the same side : ", " of the conditional sentence : ", )
+                        return
+                    for r in range(len(noun_verb_map_set_of_each_sentence[part_of_logic_sentence])):
 
-                        old_new_map_lists = old_new_map_lists + replaced_sub_input + ", "
+                        verb_and_negation_map_part = \
+                            InputsOutputsStateFinder.identify_map_verbs_with_negation(
+                                nlp, noun_verb_map_set_of_each_sentence[part_of_logic_sentence][r])
 
-                    elif 0 == len(inputs_list) and 0 < len(outputs_list):
-                        # print(noun_verb_map_set_of_each_sentence[1])
-                        outputs_verb_map_part = InputsOutputsStateFinder.verbs_finder_of_mapper(nlp, noun_verb_map_set_of_each_sentence[1])
-                        # print(outputs_verb_map_part)
-                        value_replaced_map_output_part = InputsOutputsStateFinder.value_replacer_of_mapper(nlp, noun_verb_map_set_of_each_sentence[1], outputs_verb_map_part, i_o_status_matrix)
-                        print(value_replaced_map_output_part)
-                        for s in range(len(value_replaced_map_output_part)):
-                            replaced_sub_output = str(value_replaced_map_output_part[s]).replace(
-                                noun_verb_map_set_of_each_sentence[part_of_logic_sentence][s],
-                                value_replaced_map_output_part[0][s])
-                        # if 1 == len(value_replaced_map_input_part):
-                        old_new_map_lists = old_new_map_lists + replaced_sub_output + ". "
+                        if 1 != len(verb_and_negation_map_part):
+                            print(" There is no any verb or two or more verbs in the map part : ",
+                                  noun_verb_map_set_of_each_sentence[part_of_logic_sentence][r])
+                            assert True, " Please correct the above limitation on the scenario."
+                        if 0 == len(completed_logic_sentence_part):
 
-        # print(old_new_map_lists, "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
-        completed_logic_sentences = old_new_map_lists
-        # for n in range(len(tokenize_sentences)):
-        #     str(tokenize_sentences[n]).replace()
+                            completed_sent_part = \
+                                InputsOutputsStateFinder.entity_values_generator_sent_part(
+                                    nlp, splited_sentence[part_of_logic_sentence],
+                                    noun_verb_map_set_of_each_sentence[part_of_logic_sentence][r],
+                                    verb_and_negation_map_part[0], i_o_status_matrix)
+
+                            completed_logic_sentence_part = completed_sent_part
+                        else:
+
+                            completed_sent_part = \
+                                InputsOutputsStateFinder.entity_values_generator_sent_part(
+                                    nlp, completed_logic_sentence_part,
+                                    noun_verb_map_set_of_each_sentence[part_of_logic_sentence][r],
+                                    verb_and_negation_map_part[0], i_o_status_matrix)
+
+                            completed_logic_sentence_part = completed_sent_part
+
+                    if 0 == part_of_logic_sentence:
+                        completed_logic_sentence_part = str(completed_logic_sentence_part).strip() + ", "
+                        completed_logic_sentence = completed_logic_sentence + completed_logic_sentence_part
+                    else:
+                        completed_logic_sentence_part = str(completed_logic_sentence_part).strip() + " "
+                        completed_logic_sentence = completed_logic_sentence + completed_logic_sentence_part
+            completed_logic_sentences = completed_logic_sentences + completed_logic_sentence
         return completed_logic_sentences
 
+#  #############################################################################################################
