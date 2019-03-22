@@ -11,7 +11,7 @@ class InputsOutputsStateFinder:
     """
     Input Output Status Finding and deriving from the Wordnet corpus from the nltk, spaCy tools
     """
-
+#  ##############################################################################################################
     @staticmethod
     def one_zero_finder(nlp, sentence):
         """
@@ -28,129 +28,6 @@ class InputsOutputsStateFinder:
                 io_states_current = token.text
         return io_states_current
 
-    # @staticmethod
-    # def not_value_finder(nlp, verb_of_sentence):
-    #     """
-    #     getting not availability state of each sentence
-    #     :param nlp:
-    #     :param verb_of_sentence:
-    #     :return:
-    #     """
-    #     doc_verb = nlp(verb_of_sentence)
-    #     not_availability = False
-    #     for token in doc_verb:
-    #         if token.text == "not" and token.tag_ == "RB" and token.pos_ == "ADV":
-    #             not_availability = True
-    #     return not_availability
-
-    @staticmethod
-    def phrasal_verb_finder(nlp, complex_verb):
-        """
-        pharasal verbs finder from the verb phrases (Verifing from the Wordnet)
-        :param nlp:
-        :param complex_verb:
-        :return:
-        """
-        phrasal_verb = []
-        doc_complex_verb = nlp(complex_verb)
-        pattern_for_phrasal_verb = r'<VERB><PART>'
-        doc_complex_verb = textacy.Doc(doc_complex_verb, lang='en_core_web_sm')
-        list_of_phrasal_verb = textacy.extract.pos_regex_matches(doc_complex_verb, pattern_for_phrasal_verb)
-        phrasal_verb_temp = []
-        for element_of_phrasal_verb in list_of_phrasal_verb:
-            phrasal_verb_temp = phrasal_verb_temp + [element_of_phrasal_verb.text]
-        for single_phrasal_verb in range(len(phrasal_verb_temp)):
-            str_of_phrasal_verb = str(phrasal_verb_temp[single_phrasal_verb])
-            sub_verb_list_of_phrasal_verb = str_of_phrasal_verb.split(" ")
-            sub_verb_before_lemmatize = str(sub_verb_list_of_phrasal_verb[0])
-            sub_verb_aftr_lemmatize = WordNetLemmatizer().lemmatize(sub_verb_before_lemmatize, 'v')
-            phrasal_verb_lemmatized = sub_verb_aftr_lemmatize+"_"+sub_verb_list_of_phrasal_verb[1]
-            for syn in wordnet.synsets(phrasal_verb_lemmatized, pos=wordnet.VERB):
-                if 0 < len(syn.lemmas()):
-                    phrasal_verb = phrasal_verb + [phrasal_verb_lemmatized]
-                    break
-        return phrasal_verb
-
-    @staticmethod
-    def non_phrasal_verb_finder(nlp, complex_verb, stop_word_applier):
-        """
-        Non phrasal verbs (normal verbs) finding from the verb phrases (Verifing from the Wordnet)
-        :param nlp:
-        :param complex_verb:
-        :return:
-        """
-        non_phrasal_verb = []
-        doc_complex_verb = nlp(complex_verb)
-        if stop_word_applier:
-            doc_not_stop_word = (' '.join([str(t) for t in doc_complex_verb if not t.is_stop]))
-        else:
-            doc_not_stop_word = doc_complex_verb
-
-        pattern_for_non_phrasal_verb = r'<VERB>'
-        doc_complex_verb = textacy.Doc(doc_not_stop_word, lang='en_core_web_sm')
-        list_of_non_phrasal_verb = textacy.extract.pos_regex_matches(doc_complex_verb, pattern_for_non_phrasal_verb)
-        non_phrasal_verb_temp = []
-        for element_of_non_phrasal_verb in list_of_non_phrasal_verb:
-            non_phrasal_verb_temp = non_phrasal_verb_temp + [element_of_non_phrasal_verb.text]
-        for single_non_phrasal_verb in range(len(non_phrasal_verb_temp)):
-            for syn in wordnet.synsets(
-                    WordNetLemmatizer().lemmatize(str(non_phrasal_verb_temp[single_non_phrasal_verb]), 'v'),
-                    pos=wordnet.VERB):
-                if 0 < len(syn.lemmas()):
-                    non_phrasal_verb = non_phrasal_verb + [
-                        WordNetLemmatizer().lemmatize(str(non_phrasal_verb_temp[single_non_phrasal_verb]), 'v')]
-                    break
-        return non_phrasal_verb
-
-    @staticmethod
-    def complex_verb_finder(nlp, sentence):
-        """ToDo"""
-        all_complex_verb_list = []
-        # this list will catch all verb element of sentence, the phrasal verb or verb or any other VERB format etc.
-        doc_sentence = nlp(sentence)
-        pattern = r'<VERB>*<ADV>*<PART>*<VERB>+<PART>*'  # <VB.*>*<RB>*<RP>*<VB.*>+<PP>*
-        doc_each_sentence = textacy.Doc(doc_sentence, lang='en_core_web_sm')
-        lists_verbs = textacy.extract.pos_regex_matches(doc_each_sentence, pattern)
-        for complex_verb in lists_verbs:
-            all_complex_verb_list = all_complex_verb_list + [complex_verb.text]
-        return all_complex_verb_list
-
-    @staticmethod
-    def verb_and_not_word_availability_finder(nlp, sentence):
-        """
-        Getting verbs and not state availability of the sentences
-        :param nlp:
-        :param sentence:
-        :return:
-        """
-        verb = []
-        stop_word_applier = True
-        not_availability = True
-        sentence_all_complex_verbs = InputsOutputsStateFinder.complex_verb_finder(nlp, sentence)
-        for tem_verb in range(len(sentence_all_complex_verbs)):
-            not_availability = InputsOutputsStateFinder.not_value_finder(nlp, sentence_all_complex_verbs[tem_verb])
-            phrasal_verb = InputsOutputsStateFinder.phrasal_verb_finder(nlp, sentence_all_complex_verbs[tem_verb])
-
-            if 1 < len(phrasal_verb):
-                print("There is more than one phrasal verb here in the sentence : ", sentence)
-                verb = []  # in the inputs output statement applier method will check verb length.
-                # So, remove verbs because of ignore previous verbs
-                return verb, not_availability
-            elif 1 == len(phrasal_verb):
-                verb = verb + [phrasal_verb]
-            else:
-                non_phrasal_verb = InputsOutputsStateFinder.non_phrasal_verb_finder(nlp, sentence_all_complex_verbs[
-                    tem_verb], stop_word_applier)
-                if 1 < len(non_phrasal_verb):
-                    print("There is more than one non phrasal verb here in the sentence : ", sentence)
-                    verb = []  # in the inputs output statement applier method will check verb length.
-                # So, remove verbs because of ignore previous verbs
-                    return verb, not_availability
-                elif 1 == len(non_phrasal_verb):
-                    verb = verb + [non_phrasal_verb]
-        return verb, not_availability
-
-#  ##############################################################################################################
     @staticmethod
     def not_value_finder(negation_word):
         """
@@ -502,38 +379,6 @@ class InputsOutputsStateFinder:
 
 #  ################################################################################################################
 
-    # @staticmethod
-    # def chunk_by_verb_and_relevant(text):
-    #     chunks = []
-    #     sentences = sent_tokenize(text)
-    #     grammar = r"""
-    #              NBAR  : {<NN.*>*<NN.*>}
-    #              CCAR  : {<CC><NBAR>}     # [and X]
-    #              NCAR  : {<NBAR><CCAR>*}  # Pressure sensor [and X][and Y][and Z]
-    #              FUTPAS: {<MD><RB>*<VB>}
-    #              NOV   : {<VBZ|VBP><RB>}
-    #              PHR   : {<VBN><IN|RP>}
-    #              PAS   : {<VBZ|VBP|FUTPAS|NOV><RB>*<VBN|JJ|VBG|PHR>}
-    #              FUT   : {<MD><RB>*<VB>}
-    #              NOT   : {<VBZ|VBP><RB><VB>}
-    #              ACT   : {<VBZ|VBP|FUT|NOT>}
-    #              GR    : {<NBAR|NCAR><ACT|PAS>}
-    #              """
-    #
-    #     for sent in sentences:
-    #         words = word_tokenize(sent)
-    #         tagged = pos_tag(words)
-    #         cp = RegexpParser(grammar)
-    #         t = cp.parse(tagged)
-    #         t.draw()
-    #         for s in t.subtrees():
-    #             if s.label() == "GR":
-    #                 current_str = ""
-    #                 for token in s.leaves():
-    #                     current_str = current_str + " " + token[0]
-    #                 chunks.append(current_str)
-    #     return chunks
-
     @staticmethod
     def matching_verb_and_not_value_from_io_matrix(entity, i_o_status_matrix):
         verb = ''
@@ -591,15 +436,18 @@ class InputsOutputsStateFinder:
             temp_noun_verb = verb_noun_map_part[i]
             for j in range(len(inputs_list)):
                 input_temp = str(inputs_list[j][0:2])
-                # print(input_temp)
-                verb, not_availability, io_value = InputsOutputsStateFinder.matching_verb_and_not_value_from_io_matrix(input_temp,i_o_status_matrix)
+
+                verb, not_availability, io_value = \
+                    InputsOutputsStateFinder.matching_verb_and_not_value_from_io_matrix(input_temp,i_o_status_matrix)
+
                 sentence_lemma_verb = verb_noun_mapped_chunks_list_with_verb[i][1]
                 sentence_not_availability = verb_noun_mapped_chunks_list_with_verb[i][2]
                 if verb == sentence_lemma_verb:
                     if str(not_availability) == str(sentence_not_availability):
                         print("same state")
                         final_io_state = io_value
-                        temp_noun_verb = InputsOutputsStateFinder.io_value_replacer_of_map(input_temp,final_io_state,temp_noun_verb)
+                        temp_noun_verb = \
+                            InputsOutputsStateFinder.io_value_replacer_of_map(input_temp,final_io_state,temp_noun_verb)
 
                     else:
                         print("inverse input")
@@ -643,84 +491,6 @@ class InputsOutputsStateFinder:
 
             value_replaced_map = value_replaced_map + [temp_noun_verb]
         return value_replaced_map
-
-    @staticmethod
-    def verbs_finder_of_mapper(nlp, verb_noun_mapped_chunks_list):
-        """ToDo : remove stop word filter when non phrasal verb and using new regex to identify non phrasal verbs.
-        Advantege, there is no phrasal verbs. phrasal verbs filtered at the about stage
-        """
-        verb_list_of_input_or_output = []
-        actual_complex_verb_list = []
-        for j in range(len(verb_noun_mapped_chunks_list)):
-            # print(verb_noun_mapped_chunks_list[j])
-            complex_verbs_of_input_or_output = InputsOutputsStateFinder.complex_verb_finder(nlp, verb_noun_mapped_chunks_list[j])
-            for i in range(len(complex_verbs_of_input_or_output)):
-                # print(complex_verbs_of_input_or_output[i], "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
-                not_availability = InputsOutputsStateFinder.not_value_finder(nlp, complex_verbs_of_input_or_output[i])
-                # print(not_availability, "Nooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooonnn")
-                phrasal_verbs_of_input_or_output_sentence = InputsOutputsStateFinder.phrasal_verb_finder(nlp, complex_verbs_of_input_or_output[i])
-                # print(phrasal_verbs_of_input_or_output_sentence, "this is outputs 12345")
-                if 0 == len(phrasal_verbs_of_input_or_output_sentence):
-                    # print(phrasal_verbs_of_input_or_output_sentence, "123456789012333")
-                    doc_complex_verb = nlp(complex_verbs_of_input_or_output[i])
-                    doc_not_stop_word = (' '.join([str(t) for t in doc_complex_verb if not t.is_stop]))
-                    # print(doc_not_stop_word)
-                    spliced_verb_stop_word_removed = doc_not_stop_word.split(" ")
-                    if 1 < len(spliced_verb_stop_word_removed):
-                        print("There is more than one verbs in the chuncker : ", complex_verbs_of_input_or_output[i])
-                        return
-                    elif 1 == len(spliced_verb_stop_word_removed):
-                        non_phrasal_verb_for_lemma = spliced_verb_stop_word_removed[0]
-                        # print(non_phrasal_verb_for_lemma)
-                        non_phrasal_verb_lemma = WordNetLemmatizer().lemmatize(non_phrasal_verb_for_lemma, 'v')
-                        # print(non_phrasal_verb_lemma)
-                        verb_list_of_input_or_output = verb_list_of_input_or_output + [non_phrasal_verb_lemma] + [not_availability]
-                        # print(verb_list_of_input_or_output, "9999999999999999999999999999999")
-                        actual_complex_verb_list = actual_complex_verb_list + [
-                            [complex_verbs_of_input_or_output[i]] + [non_phrasal_verb_lemma]+[not_availability]]
-                        # print(actual_complex_verb_list, " 88888888888888888888888888888888888888888888")
-                else:
-                    if 1 < len(phrasal_verbs_of_input_or_output_sentence):
-                        print("There is ambiguity on phrasal verbs please correct it on sentence : ", verb_noun_mapped_chunks_list)
-                        return
-                    else:
-                        verb_list_of_input_or_output = verb_list_of_input_or_output + [phrasal_verbs_of_input_or_output_sentence]+[not_availability]
-                        actual_complex_verb_list = actual_complex_verb_list + [
-                            [complex_verbs_of_input_or_output[j]] + [phrasal_verbs_of_input_or_output_sentence[0]]+[not_availability]]
-        # print(actual_complex_verb_list, "GGGGGGGGGGGGGGGRRRRRRRRRRRRRRRRRRRRRRR")
-        return actual_complex_verb_list
-
-    @staticmethod
-    def i_0_applier_for_input_or_output_part(nlp, sentence, sentence_input_or_output_part, i_o_status_matrix):
-        input_or_output_sentence_part = sentence_input_or_output_part
-        verb_list_of_input_or_output = []
-        actual_complex_verb_list = []
-        # print("There is no any tagged output in the sentence : ", tokenize_sentences[i])
-        complex_verbs_of_input_or_output = InputsOutputsStateFinder.complex_verb_finder(nlp, sentence_input_or_output_part)
-        for i in range(len(complex_verbs_of_input_or_output)):
-            phrasal_verbs_of_input_or_output_sentence = InputsOutputsStateFinder.phrasal_verb_finder(nlp, sentence_input_or_output_part)
-            if 0 == len(phrasal_verbs_of_input_or_output_sentence):
-                doc_complex_verb = nlp(complex_verbs_of_input_or_output[i])
-                doc_not_stop_word = (' '.join([str(t) for t in doc_complex_verb if not t.is_stop]))
-                spliced_verb_stop_word_removed = doc_not_stop_word.split(" ")
-                if 1 < len(spliced_verb_stop_word_removed):
-                    print("There is more verbs in the sentence : ", sentence, " sub sentence : ",
-                          sentence_input_or_output_part, " in the verb :", complex_verbs_of_input_or_output[i])
-                    return
-                elif 1 == len(spliced_verb_stop_word_removed):
-                    non_phrasal_verb_for_lemma = spliced_verb_stop_word_removed[0]
-                    non_phrasal_verb_lemma = WordNetLemmatizer().lemmatize(non_phrasal_verb_for_lemma)
-                    verb_list_of_input_or_output = verb_list_of_input_or_output + [non_phrasal_verb_lemma]
-                    actual_complex_verb_list = actual_complex_verb_list + [[complex_verbs_of_input_or_output[i]]+[non_phrasal_verb_lemma]]
-            else:
-                if 1 < len(phrasal_verbs_of_input_or_output_sentence):
-                    print("There is ambiguity on phrasal verbs please correct it on sentence : ", sentence)
-                    return
-                else:
-                    verb_list_of_input_or_output = verb_list_of_input_or_output + [phrasal_verbs_of_input_or_output_sentence]
-                    actual_complex_verb_list = actual_complex_verb_list + [[complex_verbs_of_input_or_output[i]]+[phrasal_verbs_of_input_or_output_sentence[0]]]
-        input_or_output_sentence_part = InputsOutputsStateFinder.value_replacer(nlp, actual_complex_verb_list, input_or_output_sentence_part, i_o_status_matrix)
-        return input_or_output_sentence_part
 
 #  ####################################################################################################################
     @staticmethod
